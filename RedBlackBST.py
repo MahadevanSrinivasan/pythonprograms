@@ -1,15 +1,20 @@
 import sys
 import random
 
+RED = True
+BLACK = False
+
 class Node:
-  def __init__(self, key, val, N):
+  def __init__(self, key, val, N, color):
     self.key = key
     self.val = val
     self.N   = N
     self.left = None
     self.right = None
-  
-class BST:
+    self.color = color
+
+# Note: Deletion is not implemented
+class RedBlackBST:
   def __init__(self):
     self.root = None
   
@@ -22,6 +27,36 @@ class BST:
     else:
       return 0
   
+  def isRed(self, node):
+    if not node:
+      return False
+    return node.color == RED
+
+  def rotateLeft(self, node):
+    x = node.right
+    node.right = x.left
+    x.left = node
+    x.color = node.color
+    node.color = RED
+    x.N = node.N
+    node.N = self.getSizeHelper(node.left) + self.getSizeHelper(node.right) + 1
+    return x
+
+  def rotateRight(self, node):
+    x = node.left
+    node.left = x.right
+    x.right = node
+    x.color = node.color
+    node.color = RED
+    x.N = node.N
+    node.N = self.getSizeHelper(node.left) + self.getSizeHelper(node.right) + 1
+    return x
+  
+  def flipColors(self, node):
+    node.color = RED
+    node.left.color = BLACK
+    node.right.color = BLACK
+
   def getValue(self, key):
     return self.getValueHelper(self.root, key)
   
@@ -37,7 +72,7 @@ class BST:
       
   def putValueHelper(self, root, key, val):
     if not root:
-      return Node(key, val, 1)
+      return Node(key, val, 1, RED)
 
     if root.key < key:
       root.right = self.putValueHelper(root.right, key, val)
@@ -46,12 +81,19 @@ class BST:
     else:
       root.val = val
     
+    if self.isRed(root.right) and (not self.isRed(root.left)):
+      root = self.rotateLeft(root)
+    if self.isRed(root.left) and self.isRed(root.left.left):
+      root = self.rotateRight(root)
+    if self.isRed(root.left) and self.isRed(root.right):
+      self.flipColors(root)
     root.N = self.getSizeHelper(root.left) + self.getSizeHelper(root.right) + 1
     return root
   
   def putValue(self, key, val):
     print 'Inserting key, val pair', key, val
     self.root = self.putValueHelper(self.root, key, val)
+    self.root.color = BLACK
 
   def inorderTraversal(self):
     q = []
@@ -186,59 +228,9 @@ class BST:
     else:
       return t + 1 + self.getRankHelper(root.right, key)
   
-  def delMin(self):
-    if not self.root:
-      return None
-    else:
-      self.root = self.delMinHelper(self.root)
-        
-  def delMinHelper(self, root):
-    if not root:
-      return None
-    
-    # Can't go anymore to the left
-    if not root.left:
-      return root.right
-    else:
-      root.left = self.delMinHelper(root.left)
-      root.N = self.getSizeHelper(root.left) + self.getSizeHelper(root.right) + 1
-      return root
-  
-  def delKey(self, key):
-    self.root = self.delKeyHelper(self.root, key)
-  
-  def delKeyHelper(self, root, key):
-    if not root:
-      return None
-      
-    if root.key < key:
-      root.right = self.delKeyHelper(root.right, key)
-    elif root.key > key:
-      root.left = self.delKeyHelper(root.left, key)
-    # Found the key
-    else:
-      # If it only has one child it is a simple operation
-      if not root.left:
-        return root.right
-      elif not root.right:
-        return root.left
-      # If it has both children, it is more complicated
-      # Save the key to be deleted
-      t = root
-      # Let us find its successor, it is the min of the right subtree
-      root = self.getMinKeyHelper(t.right)
-      # Right subtree needs to be replaced by key being deleted's right
-      # after deleting the minimum (which is the successor again)
-      root.right = self.delMinHelper(t.right)
-      # Successor is bound to have an empty left tree 
-      # Just overwrite with left tree of key being deleted
-      root.left = t.left
-
-    root.N = self.getSizeHelper(root.left) + self.getSizeHelper(root.right) + 1
-    return root
    
 if __name__ == '__main__':
-  b = BST()
+  b = RedBlackBST()
   numElems = int(sys.argv[1])
   arr = []
   for i in range(numElems):
@@ -258,14 +250,3 @@ if __name__ == '__main__':
   s = b.select(r)
   print 'Select of', r, '=', s
   print 'Rank of', s, '=', b.getRank(s)
-  print 'Deleting min'
-  b.delMin()
-  print 'Inorder Traversal after delMin', b.inorderTraversal()
-  r = random.randint(1, 99)
-  print 'Delete a random key', r
-  b.delKey(r)
-  print 'Inorder Traversal after random deletion', b.inorderTraversal()
-  print 'Delete a key in the tree', arr[2]
-  b.delKey(arr[2])
-  print 'Inorder Traversal after deletion', b.inorderTraversal()
-  
