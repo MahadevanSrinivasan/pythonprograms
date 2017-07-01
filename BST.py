@@ -8,7 +8,13 @@ class Node:
     self.N   = N
     self.left = None
     self.right = None
-  
+'''
+This BST implementation is almost entirely based on Algorithms 4th Edition by
+Sedgewick and Wayne. There are differences because of the absence of overloading
+in Python. Where applicable, there are also mentions of  exercise problem
+numbers. It also includes a driver which creates a random tree and exercises
+some of the methods involved.
+'''  
 class BST:
   def __init__(self):
     self.root = None
@@ -50,7 +56,6 @@ class BST:
     return root
   
   def putValue(self, key, val):
-    print 'Inserting key, val pair', key, val
     self.root = self.putValueHelper(self.root, key, val)
 
   def inorderTraversal(self):
@@ -64,6 +69,36 @@ class BST:
       q.append(root.key)
       q = self.inorderTraversalHelper(root.right, q)
     return q
+  
+  def getRoot(self):
+    return self.root
+  
+  # Sedgewick Exercise 3.2.37
+  def printLevel(self, node):
+    if not node:
+      return
+    
+    q = [node]
+    while q:
+      currnode = q.pop()
+      print currnode.key,
+      if currnode.left:
+        q.insert(0, currnode.left)
+      if currnode.right:
+        q.insert(0, currnode.right)
+    
+    print ""
+  
+  # Sedgewick Exercise 3.2.7
+  def getHeight(self):
+    return self.getHeightRecursive(self.root)
+    
+  def getHeightRecursive(self, root):
+    if not root:
+      return -1
+    
+    return max(self.getHeightRecursive(root.left), 
+               self.getHeightRecursive(root.right)) + 1 
   
   def getAllKeys(self):
     return self.getKeys(self.getMinKey(), self.getMaxKey())
@@ -244,9 +279,13 @@ if __name__ == '__main__':
   for i in range(numElems):
     v = random.randint(1, 99)
     arr.append(v)
+    print 'Inserting key, val pair', v, i
     b.putValue(v, i)
   
   print 'Inorder Traversal', b.inorderTraversal()
+  print 'Levelorder Traversal'
+  b.printLevel(b.getRoot())
+  print 'Height of the tree', b.getHeight()
   print 'Get all keys', b.getAllKeys()
   print 'Get keys between 1 and 50', b.getKeys(1, 50)
   print 'Get min key', b.getMinKey()
@@ -268,4 +307,3 @@ if __name__ == '__main__':
   print 'Delete a key in the tree', arr[2]
   b.delKey(arr[2])
   print 'Inorder Traversal after deletion', b.inorderTraversal()
-  
