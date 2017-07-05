@@ -100,6 +100,12 @@ class BST:
     return max(self.getHeightRecursive(root.left), 
                self.getHeightRecursive(root.right)) + 1 
   
+  def isBalanced(self):
+    if not self.root:
+      return True
+
+    return abs(self.getHeightRecursive(self.root.left) - self.getHeightRecursive(self.root.right)) <= 1
+
   def getAllKeys(self):
     return self.getKeys(self.getMinKey(), self.getMaxKey())
 
@@ -307,3 +313,6 @@ if __name__ == '__main__':
   print 'Delete a key in the tree', arr[2]
   b.delKey(arr[2])
   print 'Inorder Traversal after deletion', b.inorderTraversal()
+  print 'Levelorder Traversal'
+  b.printLevel(b.getRoot())
+  print 'Is the tree balanced?', b.isBalanced()

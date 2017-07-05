@@ -30,3 +30,5 @@ if __name__ == '__main__':
   b = PerfectBalance(b, arr)
   # Check the height of the BST
   print 'Height of the perfect tree = ', b.getHeight()
+  # Check if balanced
+  print 'Is tree balanced?', b.isBalanced()
